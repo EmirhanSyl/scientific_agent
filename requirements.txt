@@ -1,0 +1,14 @@
+# ---- Zorunlu paketler ----
+openai>=1.14.0           # LLM ve embedding çağrıları
+requests>=2.31.0         # HTTP istekleri (makale ve PDF indirme)
+beautifulsoup4>=4.12.3   # HTML parsing (gerekirse)
+faiss-cpu>=1.7.4         # Vektör veritabanı (CPU sürümü)
+python-dotenv>=1.0.1     # .env dosyasından API anahtarlarını okumak
+
+# ---- PDF/Metin işleme ----
+pdfminer.six>=20221105    # (Basit) PDF’ten metin çıkarma
+# grobid-client>=0.4.1    # ⚙️ Gelişmiş yapısal PDF parse (Grobid REST ihtiyacı)
+
+# ---- İsteğe bağlı yardımcılar ----
+# langchain>=0.1.17       # ⚙️ Retriever-QA zincirleri kurmak için
+# tqdm>=4.66.3            # ⚙️ İlerleme çubukları
