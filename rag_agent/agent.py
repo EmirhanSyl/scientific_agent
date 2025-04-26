@@ -1,5 +1,7 @@
 import os, asyncio
 from typing import List, Dict, Any
+
+from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import FAISS
 from langchain_community.llms import OpenAI
@@ -46,9 +48,29 @@ async def gather_metadata(topic: str, k_per=20) -> List[Dict[str, Any]]:
 
 async def generate_review(topic: str, max_items: int = 60) -> str:
     metadata = await gather_metadata(topic, k_per=max_items//len(RETRIEVERS))
-    docs = [m.get("abstract") or m.get("title") for m in metadata if (m.get("abstract") or m.get("title"))]
+    print(metadata)
+
+    docs = []
+    for m in metadata:
+        text = m.get("abstract") or m.get("title")
+        if not text:
+            continue
+        docs.append(
+            Document(
+                page_content=text,
+                metadata={
+                    "citekey": m["citekey"],
+                    "doi": m["doi"],
+                    "year": m["year"],
+                    "title": m["title"],
+                    "source": m["source"],
+                },
+            )
+        )
+
+    # docs = [m.get("abstract") or m.get("title") for m in metadata if (m.get("abstract") or m.get("title"))]
     splitter = CharacterTextSplitter(separator="\n", chunk_size=2048, chunk_overlap=0)
-    texts = splitter.create_documents(docs)
+    texts = splitter.split_documents(docs)
 
     print(texts)
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
@@ -60,14 +82,17 @@ async def generate_review(topic: str, max_items: int = 60) -> str:
     REVIEW_PROMPT = PromptTemplate(
         input_variables=["context", "question"],
         template=(
-            "You are an expert academic writer.\n"
-            "Using ONLY the information in CONTEXT, write a concise (~800 words) "
-            "literature review on the topic: {question}.\n"
-            "Structure with short headings (Background, Methods, Findings, Gaps, Future Work) "
-            "and cite sources inline as (FirstAuthorYear).\n\n"
-            "CONTEXT:\n{context}\n"
-            "-----\n"
-            "LITERATURE REVIEW:"
+            """CONTEXT:
+{context}
+-----
+Write a 600-word literature review on **{question}**.
+
+Rules:
+1. Use ONLY info in CONTEXT. Do NOT invent sources.
+2. Cite each factual sentence with the CITEKEY and DOI exactly as in metadata, like (Pi2024)[10.1016/j.patrec.2024.123456].
+3. End with “References:” listing each CITEKEY – DOI pair.
+
+Begin:"""
         )
     )
     chain = RetrievalQA.from_chain_type(

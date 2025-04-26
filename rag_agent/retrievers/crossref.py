@@ -56,8 +56,8 @@ class CrossrefRetriever(BaseRetriever):
             year = citekey[-4:] if citekey[-4:].isdigit() else None
 
             # Gürültülü / anlamsız kayıtları atla
-            if len(clean_abs.split()) < 30:
-                continue
+            # if len(clean_abs.split()) < 30:
+            #    continue
             if not doi:
                 continue
 
