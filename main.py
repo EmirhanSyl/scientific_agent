@@ -17,6 +17,7 @@ async def literature_review(q: Query):
     if not q.topic.strip():
         raise HTTPException(status_code=400, detail="Topic must not be empty")
     review = await generate_review(q.topic)
+    print(review)
     return {"topic": q.topic, "review": review}
 
 if __name__ == "__main__":

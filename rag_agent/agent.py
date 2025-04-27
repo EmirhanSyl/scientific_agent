@@ -55,9 +55,11 @@ async def generate_review(topic: str, max_items: int = 60) -> str:
         text = m.get("abstract") or m.get("title")
         if not text:
             continue
+
+        header = f"[{m['citekey']}][{m['doi']}] "
         docs.append(
             Document(
-                page_content=text,
+                page_content=header + text,
                 metadata={
                     "citekey": m["citekey"],
                     "doi": m["doi"],
@@ -91,6 +93,9 @@ Rules:
 1. Use ONLY info in CONTEXT. Do NOT invent sources.
 2. Cite each factual sentence with the CITEKEY and DOI exactly as in metadata, like (Pi2024)[10.1016/j.patrec.2024.123456].
 3. End with “References:” listing each CITEKEY – DOI pair.
+4. Use citekeys and DOIs as they appear at the start of each context chunk. 
+5. Do NOT invent new ones.
+
 
 Begin:"""
         )
