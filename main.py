@@ -33,7 +33,7 @@ async def literature_review(req: ReviewRequest):
     return out
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=7001)
+    uvicorn.run(app, host="0.0.0.0", port=7001, reload=True)
 
 
 # TODO: KULLANILAN KAYNAKÇALARI ÇIKAR VE REQUEST SONUCUNDA DÖNDÜR
