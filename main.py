@@ -12,10 +12,14 @@ app = FastAPI(title="RAG Literature Review API")
 class ReviewRequest(BaseModel):
     topic: str
     citation_format: str | None = Query(
-        default="raw",
-        regex="^(raw|bibtex|apa7)$",
-        description="Citation output style",
+        default="raw", regex="^(raw|bibtex|apa7)$"
     )
+    language: str | None = Query(
+        default="English",
+        description="Output language e.g. English, Turkish, German …",
+    )
+
+
 @app.post("/literature-review")
 async def literature_review(req: ReviewRequest):
     if not req.topic.strip():
@@ -23,6 +27,7 @@ async def literature_review(req: ReviewRequest):
     out = await generate_review(
         topic=req.topic,
         citation_format=req.citation_format.lower(),
+        language=req.language,
     )
     print(out)
     return out

@@ -68,6 +68,8 @@ class CrossrefRetriever(BaseRetriever):
                     "year": year,
                     "citekey": citekey,
                     "abstract": clean_abs,
+                    "authors": ["{} {}".format(a.get("given", ""), a.get("family", "")).strip()
+                                for a in (it.get("author") or [])],
                     "source": "crossref",
                 }
             )

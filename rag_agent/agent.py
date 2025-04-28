@@ -50,7 +50,7 @@ async def gather_metadata(topic: str, k_per=20) -> List[Dict[str, Any]]:
             dedup.append(m)
     return dedup
 
-async def generate_review(topic: str, citation_format: str = "raw", max_items: int = 60) -> Dict[str, Any]:
+async def generate_review(topic: str, citation_format: str = "raw", language: str = "English", max_items: int = 60) -> Dict[str, Any]:
     meta_list = await gather_metadata(topic, k_per=max_items // len(RETRIEVERS))
 
     docs = []
@@ -80,12 +80,11 @@ async def generate_review(topic: str, citation_format: str = "raw", max_items: i
         input_variables=["context", "question"],
         template=(
             "CONTEXT:\n{context}\n-----\n"
-            "Write a 600-word literature review on **{question}**.\n\n"
+            "Write a 600-word literature review **in {language}** on **{question}**.\n\n"
             "Rules:\n"
             "1. Use ONLY info in CONTEXT. Do NOT invent sources.\n"
-            "2. Cite each factual sentence with the CITEKEY and DOI exactly as "
-            "in metadata, like (Pi2024)[10.1016/j.patrec.2024.123456].\n"
-            "3. End with “References:” listing each CITEKEY in BibTeX format.\n"
+            "2. Cite each factual sentence with the CITEKEY and DOI exactly as metadata.\n"
+            "3. End with “References:” listing each citation in BibTeX format.\n"
             "4. Use citekeys/DOIs as they appear; do NOT invent new ones.\n\n"
             "Begin:"
         ),
@@ -96,7 +95,7 @@ async def generate_review(topic: str, citation_format: str = "raw", max_items: i
         chain_type="stuff",
         retriever=retriever,
         return_source_documents=True,
-        chain_type_kwargs={"prompt": REVIEW_PROMPT},
+        chain_type_kwargs={"prompt": REVIEW_PROMPT.partial(language=language)},
     )
 
     out = chain.invoke({"query": topic})
@@ -108,6 +107,7 @@ async def generate_review(topic: str, citation_format: str = "raw", max_items: i
         CITE_BIBTEX.findall(review_text)
     )
 
+    cleaned_text = review_text.split("@article", 1)[0].rstrip()
     resources: List[Dict[str, Any]] = []
     seen_pairs = set()
     for d in retrieved_docs:
@@ -120,10 +120,11 @@ async def generate_review(topic: str, citation_format: str = "raw", max_items: i
                     "doi": doi,
                     "title": d.metadata["title"],
                     "year": d.metadata["year"],
+                    "authors": d.metadata["authors"],
                     "source": d.metadata["source"],
                 }
             )
 
     formatter = CitationFormatter()
     formatted = formatter.format(resources, style=citation_format)
-    return {"query": topic, "result": review_text, "resources": resources, "citations": formatted}
+    return {"query": topic, "result": cleaned_text, "resources": resources, "citations": formatted}
