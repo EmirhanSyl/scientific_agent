@@ -13,7 +13,7 @@ class ReviewRequest(BaseModel):
     topic: str
     citation_format: str | None = Query(
         default="raw",
-        pattern="^(raw|bibtex|apa7)$", 
+        pattern="^(raw|bibtex|apa7)$",
     )
     language: str | None = Query(
         default="English",

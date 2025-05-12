@@ -83,8 +83,8 @@ async def generate_review(topic: str, citation_format: str = "raw", language: st
             "Write a 600-word literature review **in {language}** on **{question}**.\n\n"
             "Rules:\n"
             "1. Use ONLY info in CONTEXT. Do NOT invent sources.\n"
-            "2. Cite each factual sentence with the reference information exactly in metadata.\n"
-            "3. End with “References:” listing each citation in BibTeX format.\n"
+            "2. Cite each factual sentence with the reference information according to metadata.\n"
+            "3. End with “References:” listing ALL citations in BibTeX format. Do not skip any citation that can be inline or not. Give it in this part.\n"
             "4. Use citekeys/DOIs as they appear; do NOT invent new ones.\n\n"
             "Begin:"
         ),
