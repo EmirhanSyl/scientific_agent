@@ -83,7 +83,7 @@ async def generate_review(topic: str, citation_format: str = "raw", language: st
             "Write a 600-word literature review **in {language}** on **{question}**.\n\n"
             "Rules:\n"
             "1. Use ONLY info in CONTEXT. Do NOT invent sources.\n"
-            "2. Cite each factual sentence with the CITEKEY and DOI exactly as metadata.\n"
+            "2. Cite each factual sentence with the reference information exactly in metadata.\n"
             "3. End with “References:” listing each citation in BibTeX format.\n"
             "4. Use citekeys/DOIs as they appear; do NOT invent new ones.\n\n"
             "Begin:"
@@ -107,7 +107,7 @@ async def generate_review(topic: str, citation_format: str = "raw", language: st
         CITE_BIBTEX.findall(review_text)
     )
 
-    cleaned_text = review_text.split("@article", 1)[0].rstrip()
+    cleaned_text = review_text.split("References:", 1)[0].rstrip()
     resources: List[Dict[str, Any]] = []
     seen_pairs = set()
     for d in retrieved_docs:
