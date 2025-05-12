@@ -111,19 +111,16 @@ async def generate_review(topic: str, citation_format: str = "raw", language: st
     resources: List[Dict[str, Any]] = []
     seen_pairs = set()
     for d in retrieved_docs:
-        ck, doi = d.metadata["citekey"], d.metadata["doi"]
-        if ck in cited and (ck, doi) not in seen_pairs:
-            seen_pairs.add((ck, doi))
-            resources.append(
-                {
-                    "citekey": ck,
-                    "doi": doi,
-                    "title": d.metadata["title"],
-                    "year": d.metadata["year"],
-                    "authors": d.metadata["authors"],
-                    "source": d.metadata["source"],
-                }
-            )
+        resources.append(
+            {
+                "citekey": ck,
+                "doi": doi,
+                "title": d.metadata["title"],
+                "year": d.metadata["year"],
+                "authors": d.metadata["authors"],
+                "source": d.metadata["source"],
+            }
+        )
 
     formatter = CitationFormatter()
     formatted = formatter.format(resources, style=citation_format)
