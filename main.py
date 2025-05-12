@@ -12,7 +12,8 @@ app = FastAPI(title="RAG Literature Review API")
 class ReviewRequest(BaseModel):
     topic: str
     citation_format: str | None = Query(
-        default="raw", regex="^(raw|bibtex|apa7)$"
+        default="raw",
+        pattern="^(raw|bibtex|apa7)$", 
     )
     language: str | None = Query(
         default="English",
