@@ -168,7 +168,3 @@ Literature used for model synthesis and benchmarking is cited in BibTeX format i
 ## Contributing
 
 Pull requests and feature suggestions are welcome, particularly around new retriever integrations, multilingual capabilities, or review evaluation methods.
-
----
-
-Eğer Türkçe bir versiyonunu isterseniz veya daha kısa bir özet biçiminde sunulmasını tercih ediyorsanız, memnuniyetle yardımcı olurum.
