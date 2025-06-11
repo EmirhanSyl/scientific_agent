@@ -1,5 +1,178 @@
-# scientific_agent
- 
+Teşekkür ederim, önemli bir detay. Aşağıda, **sadece biyomedikal alanla sınırlı olmayan**, çok alanlı akademik araştırmalar için tasarlanmış bir sistem olduğunu yansıtan, **daha kapsayıcı ve profesyonel** bir `README.md` dosyasını paylaşıyorum:
 
+---
 
-Retrieval-Augmented Generation (RAG) has emerged as a transformative approach in the field of biomedicine, addressing the limitations of static pre-trained models by integrating dynamic external knowledge retrieval with generative text modeling. This literature review explores the application of RAG in biomedicine, highlighting its potential to enhance model reliability, improve factual accuracy, and enable real-time knowledge adaptation.\n\nThe foundational principles of RAG involve retrieving relevant documents or structured knowledge at inference time, which significantly enhances the reliability and factual grounding of large language models (LLMs) (Genesis2025)[10.20944/preprints202504.0443.v1]. In the biomedical domain, this capability is crucial due to the rapidly evolving nature of medical knowledge and the necessity for up-to-date information. The integration of RAG in biomedicine allows for the adaptation of LLMs to incorporate the latest research findings and clinical guidelines, thereby improving the accuracy and relevance of generated outputs (Huang2024)[10.1109/bibm62325.2024.10822725].\n\nOne of the key applications of RAG in biomedicine is in the area of biomedical research, where it facilitates the summarization of scientific literature and the extraction of pertinent information from vast datasets. By employing retrieval mechanisms such as sparse and dense retrieval, RAG systems can efficiently identify and integrate relevant biomedical documents, enhancing the quality of generated summaries and insights (Genesis2025)[10.20944/preprints202504.0443.v1]. This capability is particularly beneficial in fields like genomics and pharmacology, where the volume of published research is immense and continuously growing.\n\nThe Biomedrag model exemplifies the application of RAG in biomedicine, demonstrating how retrieval-augmented LLMs can be tailored to meet the specific needs of the biomedical field (Li2024)[10.2139/ssrn.4910081]. By leveraging retrieval-augmented techniques, Biomedrag enhances the model's ability to generate accurate and contextually relevant biomedical information, thereby supporting tasks such as clinical decision-making and personalized medicine.\n\nDespite its advantages, the implementation of RAG in biomedicine is not without challenges. Retrieval noise, latency constraints, and bias in retrieved content are significant concerns that need to be addressed to ensure the reliability and fairness of RAG systems (Genesis2025)[10.20944/preprints202504.0443.v1]. Additionally, the integration of multimodal knowledge, such as combining textual and visual data, presents opportunities for further enhancing the capabilities of RAG in biomedicine (Singh2024)[10.36227/techrxiv.173152556.61823435/v1].\n\nTo overcome these challenges, ongoing research is focused on developing scalable retrieval architectures and bias-aware ranking techniques that can improve the efficiency and fairness of RAG systems (Genesis2025)[10.20944/preprints202504.0443.v1]. Furthermore, the exploration of continual learning approaches for adaptive retrieval is crucial for maintaining the relevance and accuracy of biomedical RAG systems in the face of evolving knowledge (Genesis2025)[10.20944/preprints202504.0443.v1].\n\nIn conclusion, Retrieval-Augmented Generation holds significant promise for advancing the field of biomedicine by enabling more accurate, interpretable, and knowledge-aware artificial intelligence systems. As RAG continues to evolve, it is poised to redefine the landscape of AI-driven text generation in biomedicine, paving the way for innovative applications in clinical practice, research, and healthcare delivery.\n\nReferences:\n```bibtex\n@article{Genesis2025,\n  title={Large Language Models (LLMs) have demonstrated remarkable capabilities in natural language understanding and generation. However, they are inherently constrained by the static nature of their pretraining data, leading to challenges such as knowledge obsolescence, hallucination, and limited factual grounding. Retrieval-Augmented Generation (RAG) has emerged as a powerful paradigm that addresses these limitations by dynamically integrating external knowledge retrieval with generative text modeling. By retrieving relevant documents or structured knowledge at inference time, RAG enhances model reliability, improves factual accuracy, and enables real-time knowledge adaptation.This survey provides a comprehensive overview of RAG, covering its foundational principles, retrieval mechanisms, generative strategies, and integration methodologies. We discuss various retrieval approaches, including sparse and dense retrieval, hybrid search models, and reinforcement learning-based retrieval optimization. We explore different fusion techniques for incorporating retrieved knowledge into generation, such as prompt concatenation, attention-based integration, and iterative refinement. Additionally, we examine the diverse applications of RAG across domains such as open-domain question answering, conversational AI, scientific literature summarization, code generation, legal document analysis, and biomedical research.Despite its advantages, RAG introduces new challenges, including retrieval noise, latency constraints, security vulnerabilities, and bias in retrieved content. We highlight key research directions to address these challenges, including scalable retrieval architectures, multimodal knowledge integration, continual learning for adaptive retrieval, and bias-aware ranking techniques. Furthermore, we discuss the broader implications of RAG in enabling explainable AI, bridging structured and unstructured knowledge sources, and democratizing access to real-time information.By synthesizing recent advancements and outlining future research opportunities, this survey serves as a foundational resource for researchers and practitioners working on retrieval-augmented systems. As RAG continues to evolve, it is poised to redefine the landscape of AI-driven text generation, paving the way for more accurate, interpretable, and knowledge-aware artificial intelligence systems},\n  author={Genesis},\n  year={2025},\n  doi={10.20944/preprints202504.0443.v1}\n}\n\n@article{Huang2024,\n  title={Adapting Large Language Models for Biomedicine though Retrieval-Augmented Generation with Documents Scoring},\n  author={Huang},\n  year={2024},\n  doi={10.1109/bibm62325.2024.10822725}\n}\n\n@article{Li2024,\n  title={Biomedrag: A Retrieval Augmented Large Language Model for Biomedicine},\n  author={Li},\n  year={2024},\n  doi={10.2139/ssrn.4910081}\n}\n\n@article{Singh2024,\n  title={A Multimodal Framework for Quantifying Retrieval-Augmented Generation Efficacy},\n  author={Singh},\n  year={2024},\n  doi={10.36227/techrxiv.173152556.61823435/v1}\n}\n```
+# scientific\_agent
+
+**Scientific Agent: A Retrieval-Augmented Generation (RAG) System for Domain-Aware Literature Review Automation**
+
+---
+
+## Overview
+
+**scientific\_agent** is an AI-powered literature review system that combines the power of **Retrieval-Augmented Generation (RAG)** with structured metadata from scientific databases. It enables the generation of **accurate, context-rich, and citation-ready** literature reviews across various research domains including—but not limited to—biomedicine, computer science, engineering, social sciences, and environmental studies.
+
+The system leverages modern language models, real-time knowledge retrieval, and multi-source citation formatting to support scalable, credible, and multilingual scholarly writing.
+
+---
+
+## Key Features
+
+* 🔍 **Domain-Agnostic RAG Pipeline**
+  Capable of generating literature reviews on any topic where academic publications are available—across disciplines.
+
+* 📚 **Multi-Source Retrieval**
+  Retrieves metadata and abstracts from **Crossref**, with optional support for **Scopus** and **Web of Science**, ensuring comprehensive coverage.
+
+* 💡 **Knowledge-Grounded Generation**
+  Uses OpenAI embeddings and FAISS vector search to ground language model outputs in retrieved, relevant documents.
+
+* 🌐 **REST API Access**
+  Offers a FastAPI-based endpoint for integrating RAG-based review generation into research tools or academic workflows.
+
+* 🧾 **Flexible Citation Formats**
+  Outputs citations in **BibTeX**, **APA 7**, or raw key/DOI formats based on user preference.
+
+* 🌍 **Multilingual Support**
+  Literature reviews can be generated in multiple languages by specifying the target language.
+
+---
+
+## Use Cases
+
+* 📖 Academic Literature Reviews (e.g., AI ethics, climate change, neural network architectures)
+* 🧬 Biomedical Research Summaries
+* ⚖️ Legal and Policy Analysis with Reference Tracking
+* 📊 Technical Surveys in Engineering and Data Science
+* 🧠 Scientific Knowledge Gap Identification
+
+---
+
+## Installation & Setup
+
+```bash
+pip install -r requirements.txt
+```
+
+Create a `.env` file with your API credentials:
+
+```dotenv
+OPENAI_API_KEY=your_openai_key
+CROSSREF_MAILTO=your_email@example.com
+# Optional:
+ELSEVIER_API_KEY=...
+WOS_API_KEY=...
+```
+
+---
+
+## Usage
+
+### CLI Mode
+
+```bash
+python scientific_rag_agent.py
+```
+
+You will be prompted for a topic. The resulting `literature_review.md` will be created in the current directory.
+
+### API Mode
+
+Start the FastAPI server:
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 7001
+```
+
+Then send a POST request to:
+
+```
+POST /literature-review
+```
+
+#### Example Request
+
+```json
+{
+  "topic": "The impact of generative AI on educational assessment",
+  "citation_format": "apa7",
+  "language": "English"
+}
+```
+
+---
+
+## System Architecture
+
+* **Retrievers**: Modular design for metadata extraction from Crossref, Scopus, and Web of Science.
+* **Embedding + Retrieval**: Uses OpenAI embeddings and FAISS for nearest-neighbor search.
+* **LLM Backend**: `gpt-4o` and `gpt-4o-mini` models for natural language generation.
+* **Citation Formatter**: Styles include raw, BibTeX, and APA 7.
+* **Prompt Templates**: Designed for domain-aware, citation-rich synthesis.
+
+---
+
+## Limitations
+
+* **Retrieval Dependency**: Quality depends on the abstracts and metadata available from external APIs.
+* **Citation Bias**: May inherit biases from underlying datasets or retrieval algorithms.
+* **Factual Constraints**: Only generates from retrieved content; does not fabricate knowledge.
+
+---
+
+## Future Work
+
+* 📑 PDF ingestion and multimodal source support
+* 📌 Full-text summarization (beyond abstracts)
+* 🧠 Continual learning for evolving knowledge bases
+* 🧮 Improved metrics for coherence, factual grounding, and citation coverage
+
+---
+
+## License
+
+Licensed under the [MIT License](LICENSE)
+© 2025 Emirhan Soylu
+
+---
+
+## References
+
+Literature used for model synthesis and benchmarking is cited in BibTeX format in the output files. For a conceptual background, see:
+
+```bibtex
+@article{Genesis2025,
+  title={Large Language Models (LLMs)...},
+  author={Genesis},
+  year={2025},
+  doi={10.20944/preprints202504.0443.v1}
+}
+@article{Li2024,
+  title={Biomedrag: A Retrieval Augmented Large Language Model for Biomedicine},
+  author={Li},
+  year={2024},
+  doi={10.2139/ssrn.4910081}
+}
+@article{Huang2024,
+  title={Adapting LLMs for Biomedicine through Retrieval-Augmented Generation},
+  author={Huang},
+  year={2024},
+  doi={10.1109/bibm62325.2024.10822725}
+}
+@article{Singh2024,
+  title={A Multimodal Framework for Quantifying RAG Efficacy},
+  author={Singh},
+  year={2024},
+  doi={10.36227/techrxiv.173152556.61823435/v1}
+}
+```
+
+---
+
+## Contributing
+
+Pull requests and feature suggestions are welcome, particularly around new retriever integrations, multilingual capabilities, or review evaluation methods.
+
+---
+
+Eğer Türkçe bir versiyonunu isterseniz veya daha kısa bir özet biçiminde sunulmasını tercih ediyorsanız, memnuniyetle yardımcı olurum.
