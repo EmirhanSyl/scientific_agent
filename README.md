@@ -1,7 +1,3 @@
-Teşekkür ederim, önemli bir detay. Aşağıda, **sadece biyomedikal alanla sınırlı olmayan**, çok alanlı akademik araştırmalar için tasarlanmış bir sistem olduğunu yansıtan, **daha kapsayıcı ve profesyonel** bir `README.md` dosyasını paylaşıyorum:
-
----
-
 # scientific\_agent
 
 **Scientific Agent: A Retrieval-Augmented Generation (RAG) System for Domain-Aware Literature Review Automation**
