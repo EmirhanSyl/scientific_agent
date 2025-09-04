@@ -11,4 +11,4 @@ python-dotenv>=1.0.1
 pytest>=8.1
 langchain-community>=0.3.22
 langchain-openai>=0.3.14
-ollama>=0.4.0
+langchain_ollama
