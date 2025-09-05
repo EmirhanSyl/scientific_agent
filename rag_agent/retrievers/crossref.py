@@ -12,7 +12,6 @@ CROSSREF_API = "https://api.crossref.org/works"
 class CrossrefRetriever(BaseRetriever):
     """Retriever for Crossref Works API with robust parsing & fallbacks."""
 
-    # ── Helpers ──────────────────────────────────────────────────────────────
     @staticmethod
     def _strip_html(raw: str) -> str:
         if not raw:
@@ -33,19 +32,19 @@ class CrossrefRetriever(BaseRetriever):
         )
         authors = item.get("author") or []
         surname = authors[0].get("family", "Anon") if authors else "Anon"
+        # keep a slightly more collision-resistant key but same field name
         title_words = re.sub(
             r"[^A-Za-z0-9 ]+", " ", ((item.get("title") or [""])[0])
         ).split()
         first_word = next((w for w in title_words if len(w) > 2), "Work")
         return f"{surname}{year}{first_word.capitalize()}"
 
-    # ── Main ─────────────────────────────────────────────────────────────────
     def fetch_metadata(self, query: str, k: int = 20) -> List[Dict[str, Any]]:
         mailto = os.getenv("CROSSREF_MAILTO", "example@example.com")
         params = {
             "query.bibliographic": query,
             "rows": k,
-            "select": "title,author,issued,DOI,abstract,URL,container-title",
+            "select": "title,author,issued,DOI,abstract",
             "mailto": mailto,
         }
         headers = {"User-Agent": f"rag-agent/0.2 (mailto:{mailto})"}
@@ -55,7 +54,6 @@ class CrossrefRetriever(BaseRetriever):
         items = resp.json().get("message", {}).get("items", [])
 
         if not items:
-            # Fallback to generic 'query' if bibliographic returns nothing
             params.pop("query.bibliographic", None)
             params["query"] = query
             resp = requests.get(CROSSREF_API, params=params, headers=headers, timeout=30)
@@ -78,15 +76,13 @@ class CrossrefRetriever(BaseRetriever):
                 {
                     "title": title,
                     "doi": doi,
+                    "abstract": clean_abs,
                     "year": year,
                     "citekey": self._citekey(it),
-                    "abstract": clean_abs,
                     "authors": [
                         ("{} {}".format(a.get("given", ""), a.get("family", ""))).strip()
                         for a in (it.get("author") or [])
                     ],
-                    "venue": (it.get("container-title") or [""])[0] or None,
-                    "url": it.get("URL"),
                     "source": "crossref",
                 }
             )

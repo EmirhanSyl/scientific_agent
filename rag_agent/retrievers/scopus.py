@@ -12,7 +12,6 @@ class ScopusRetriever(BaseRetriever):
     """Retriever for Elsevier Scopus Search API with safer defaults."""
 
     def fetch_metadata(self, query: str, k: int = 20) -> List[Dict[str, Any]]:
-        # Read environment at call-time (not import-time)
         api_key = os.getenv("ELSEVIER_API_KEY")
         inst_token = os.getenv("ELSEVIER_INST_TOKEN")
         if not api_key:
@@ -27,7 +26,6 @@ class ScopusRetriever(BaseRetriever):
             headers["X-ELS-Insttoken"] = inst_token
 
         q = query.strip()
-        # If the query is plain text, wrap it in TITLE-ABS-KEY(...)
         if "TITLE-ABS-KEY" not in q.upper() and any(ch.isalpha() for ch in q):
             q = f'TITLE-ABS-KEY("{q}")'
 
@@ -72,8 +70,6 @@ class ScopusRetriever(BaseRetriever):
                     "year": year,
                     "citekey": citekey,
                     "authors": authors,
-                    "venue": None,
-                    "url": None,
                     "source": "scopus",
                 }
             )

@@ -68,7 +68,8 @@ def _select_top_records(topic: str, records: List[Dict[str, Any]], k: int = 12) 
 
 
 def _records_minimal_json(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    keep = ("citekey", "title", "abstract", "year", "authors", "venue", "doi", "url", "source")
+    # EXACT return type fields used downstream
+    keep = ("citekey", "title", "abstract", "year", "authors", "doi", "source")
     return [{k: r.get(k) for k in keep} for r in records]
 
 
@@ -137,11 +138,6 @@ Return a JSON object conforming to LiteratureDraft. No extra commentary.
 # ── Public API (keeps the response TYPE = string) ───────────────────────────
 
 def generate_review(topic: str, citation_format: str = "raw", language: str = "English") -> str:
-    """
-    Returns a SINGLE STRING (markdown). This preserves the existing API response type.
-    Internally uses LangChain structured output (Pydantic) and then renders markdown.
-    """
-    # 1) retrieval
     cr = CrossrefRetriever()
     sc = ScopusRetriever()
     rec_cr = cr.fetch_metadata(topic, k=50)
@@ -152,31 +148,25 @@ def generate_review(topic: str, citation_format: str = "raw", language: str = "E
 
     merged = rec_cr + rec_sc
     if not merged:
-        return f"# Literature review on: {topic}\n\n" \
-               f"## Limitations\nNo records were retrieved from Crossref/Scopus for this query.\n"
+        return f"# Literature review on: {topic}\n\n## Limitations\nNo records were retrieved from Crossref/Scopus for this query.\n"
 
-    # 2) de-duplication and selection
+    # dedupe + select
     merged = _dedupe_citekeys(merged)
     top_records = _select_top_records(topic, merged, k=12)
     records_json = _records_minimal_json(top_records)
 
-    # 3) LLM drafting with structured output (internal)
+    # structured draft
     chat = ChatOpenAI(model="gpt-4o", temperature=0.2)
-    draft_llm = chat.with_structured_output(LiteratureDraft, method="function_calling")
-    prompt = ChatPromptTemplate.from_messages(
-        [("system", SYSTEM_PROMPT), ("human", HUMAN_PROMPT)]
-    )
-    chain = prompt | draft_llm
-    draft: LiteratureDraft = chain.invoke(
+    draft_llm = chat.with_structured_output(LiteratureDraft)
+    prompt = ChatPromptTemplate.from_messages([("system", SYSTEM_PROMPT), ("human", HUMAN_PROMPT)])
+    draft: LiteratureDraft = (prompt | draft_llm).invoke(
         {"topic": topic, "language": language, "records_json": records_json}
     )
 
-    # 4) references
+    # references → map citekeys back to merged (same field set)
     citekeys = draft.references or _gather_citekeys_from_text(draft.sections)
     by_ck = {r["citekey"]: r for r in merged}
     selected_records = [by_ck[ck] for ck in citekeys if ck in by_ck]
-    formatter = CitationFormatter()
-    rendered_refs = formatter.format(selected_records, style=citation_format)
+    rendered_refs = CitationFormatter().format(selected_records, style=citation_format)
 
-    # 5) markdown render (STRING response)
     return _render_markdown(draft, rendered_refs)
