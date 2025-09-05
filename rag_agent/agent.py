@@ -45,7 +45,7 @@ async def gather_metadata(topic: str, k_per: int = 20) -> List[Dict[str, Any]]:
     for ret in RETRIEVERS:
         try:
             data = ret.fetch_metadata(topic, k=k_per)
-            print(data)
+            print(f"Data from {ret.__class__.__name__}: {data}")
             all_meta.extend(data)
         except Exception as e:
             print(f"[WARN] Retriever {ret.__class__.__name__} failed: {e}")
