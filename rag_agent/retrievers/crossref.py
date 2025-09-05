@@ -45,6 +45,7 @@ class CrossrefRetriever(BaseRetriever):
         resp = requests.get(CROSSREF_API, params=params, headers=headers, timeout=30)
         resp.raise_for_status()
         items = resp.json().get("message", {}).get("items", [])
+        print(resp.json())
 
         results: List[Dict[str, Any]] = []
         for it in items:
