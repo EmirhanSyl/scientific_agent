@@ -21,18 +21,15 @@ class ReviewRequest(BaseModel):
     )
 
 @app.post("/literature-review")
-async def literature_review(req: ReviewRequest):
+def literature_review(req: ReviewRequest):
     if not req.topic.strip():
         raise HTTPException(400, "Topic must not be empty")
-
-    # generate_review is sync → run it in a worker thread
-    out = await asyncio.to_thread(
-        generate_review,
+    out = generate_review(
         topic=req.topic,
         citation_format=(req.citation_format or "raw").lower(),
         language=req.language or "English",
     )
-    print(f"Result: {out}")
+    print(out)
     return out
 
 if __name__ == "__main__":
