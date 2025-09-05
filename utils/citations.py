@@ -17,19 +17,32 @@ class CitationFormatter:
     # ── style funcs ───────────────────────────────────────────────────────
     @staticmethod
     def _raw(r: Dict) -> str:
-        return f"{r['citekey']} – {r['doi']}"
+        doi_part = f" – {r['doi']}" if r.get("doi") else ""
+        return f"{r['citekey']}{doi_part}"
 
     @staticmethod
     def _bibtex(r: Dict) -> str:
-        entry_type = "article" if r["source"] == "crossref" else "misc"
+        entry_type = "article" if r.get("venue") else "misc"
+        doi_line = f"  doi    = {{{r['doi']}}}\n" if r.get("doi") else ""
+        venue_line = f"  journal= {{{r['venue']}}},\n" if r.get("venue") else ""
         return (
             f"@{entry_type}{{{r['citekey']}}},\n"
-            f"  title  = {{{r['title']}}},\n"
-            f"  year   = {{{r['year']}}},\n"
-            f"  doi    = {{{r['doi']}}}\n"
+            f"  title  = {{{r.get('title','')}}},\n"
+            f"{venue_line}"
+            f"  year   = {{{r.get('year','n.d.')}}},\n"
+            f"{doi_line}"
             f"}}"
         )
 
     @staticmethod
     def _apa7(r: Dict) -> str:
-        return f"{r['citekey']}. ({r['year']}). *{r['title']}*. https://doi.org/{r['doi']}"
+        year = r.get("year") or "n.d."
+        title = r.get("title") or "[No title]"
+        venue = r.get("venue")
+        doi = r.get("doi")
+        parts = [f"{r['citekey']}. ({year}). *{title}*"]
+        if venue:
+            parts.append(venue)
+        if doi:
+            parts.append(f"https://doi.org/{doi}")
+        return " ".join(parts)
