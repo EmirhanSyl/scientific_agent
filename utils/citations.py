@@ -20,7 +20,6 @@ class CitationFormatter:
 
     @staticmethod
     def _bibtex(r: Dict) -> str:
-        # Back to source-based type, no 'venue' dependency
         entry_type = "article" if r.get("source") == "crossref" else "misc"
         doi_line = f"  doi    = {{{r['doi']}}}\n" if r.get("doi") else ""
         return (
@@ -33,9 +32,10 @@ class CitationFormatter:
 
     @staticmethod
     def _apa7(r: Dict) -> str:
+        # Plain-text APA-like, no italics to match your example
         year = r.get("year") or "n.d."
         title = r.get("title") or "[No title]"
-        parts = [f"{r['citekey']}. ({year}). *{title}*"]
+        parts = [f"{r['citekey']}. ({year}). {title}."]
         if r.get("doi"):
             parts.append(f"https://doi.org/{r['doi']}")
         return " ".join(parts)

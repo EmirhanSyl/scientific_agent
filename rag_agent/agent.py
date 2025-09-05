@@ -20,15 +20,12 @@ class LiteratureSection(BaseModel):
 
 
 class LiteratureDraft(BaseModel):
-    """LLM-structured output of the review; will be rendered to markdown string."""
+    """LLM-structured output of the review."""
     title: str
     summary: str
     sections: List[LiteratureSection]
     limitations: str
-    references: List[str] = Field(
-        default_factory=list,
-        description="List of citekeys referenced in the text"
-    )
+    references: List[str] = Field(default_factory=list, description="Citekeys referenced")
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
@@ -68,13 +65,13 @@ def _select_top_records(topic: str, records: List[Dict[str, Any]], k: int = 12) 
 
 
 def _records_minimal_json(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    # EXACT return type fields used downstream
-    keep = ("citekey", "title", "abstract", "year", "authors", "doi", "source")
+    # EXACT field-set expected downstream and in API 'resources'
+    keep = ("title", "doi", "abstract", "year", "citekey", "authors", "source")
     return [{k: r.get(k) for k in keep} for r in records]
 
 
 def _gather_citekeys_from_text(sections: List[LiteratureSection]) -> List[str]:
-    """Find patterns like (Smith2020) or (Smith2020a; Lee2022)."""
+    """Find (Smith2020) or (Smith2020a; Lee2022) patterns."""
     citekeys: List[str] = []
     patt = re.compile(r"\(([^)]+)\)")
     for sec in sections:
@@ -83,7 +80,6 @@ def _gather_citekeys_from_text(sections: List[LiteratureSection]) -> List[str]:
             for token in [t.strip() for t in inside.split(";")]:
                 if re.match(r"^[A-Za-z][A-Za-z]+[0-9]{3,4}[a-z]?$", token):
                     citekeys.append(token)
-    # unique in order
     seen, uniq = set(), []
     for ck in citekeys:
         if ck not in seen:
@@ -92,22 +88,51 @@ def _gather_citekeys_from_text(sections: List[LiteratureSection]) -> List[str]:
     return uniq
 
 
-def _render_markdown(draft: LiteratureDraft, rendered_refs: List[str]) -> str:
-    lines = [f"# {draft.title}", ""]
+def _paren_to_bracket_citations(text: str, doi_map: Dict[str, str]) -> str:
+    """
+    Replace parentheses citations with bracket style:
+      "(Smith2020; Lee2021a)" → "[Smith2020][DOI1] [Lee2021a][DOI2]"
+    If DOI missing → just "[Smith2020]".
+    """
+    patt = re.compile(r"\(([^)]+)\)")
+
+    def repl(m: re.Match) -> str:
+        tokens = [t.strip() for t in m.group(1).split(";")]
+        out_tokens: List[str] = []
+        for tok in tokens:
+            # strip trailing punctuation inside token
+            tok_clean = re.sub(r"[.,;:\s]+$", "", tok)
+            if not tok_clean:
+                continue
+            doi = doi_map.get(tok_clean)
+            if doi:
+                out_tokens.append(f"[{tok_clean}][{doi}]")
+            else:
+                out_tokens.append(f"[{tok_clean}]")
+        return " ".join(out_tokens)
+
+    return patt.sub(repl, text)
+
+
+def _draft_to_result_text(draft: LiteratureDraft, doi_map: Dict[str, str]) -> str:
+    """Build a single plain-text review string with bracket citations and no headings."""
+    blocks: List[str] = []
     if draft.summary:
-        lines += ["## Executive Summary", draft.summary, ""]
+        blocks.append(_paren_to_bracket_citations(draft.summary, doi_map))
     for s in draft.sections:
-        lines += [f"## {s.heading}", s.body, ""]
+        body = _paren_to_bracket_citations(s.body, doi_map)
+        blocks.append(body)
     if draft.limitations:
-        lines += ["## Limitations", draft.limitations, ""]
-    if rendered_refs:
-        lines += ["## References"]
-        lines += [f"- {r}" for r in rendered_refs]
-        lines.append("")
-    return "\n".join(lines)
+        blocks.append(_paren_to_bracket_citations(draft.limitations, doi_map))
+    return "\n\n".join([b for b in blocks if b.strip()])
 
 
-# ── Prompts (escaped braces) ────────────────────────────────────────────────
+def _render_citations_list(selected_records: List[Dict[str, Any]], citation_format: str) -> List[str]:
+    formatter = CitationFormatter()
+    return formatter.format(selected_records, style=citation_format)
+
+
+# ── Prompts ─────────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT = """You are an expert academic writer.
 Return ONLY a valid JSON object matching the LiteratureDraft schema:
@@ -119,7 +144,7 @@ Return ONLY a valid JSON object matching the LiteratureDraft schema:
 
 Rules:
 - Ground claims strictly on the provided records (titles/abstracts).
-- Use inline citations like (Smith 2021) or (Lee 2022a; Kim 2023).
+- Use inline citations like (Smith2021) or (Lee2022a; Kim2023).
 - Be precise, technical, and concise; avoid speculation.
 - Do not invent sources or citekeys not in the records.
 """
@@ -135,9 +160,19 @@ Return a JSON object conforming to LiteratureDraft. No extra commentary.
 """
 
 
-# ── Public API (keeps the response TYPE = string) ───────────────────────────
+# ── Public API (returns dict: query/result/resources/citations) ─────────────
 
-def generate_review(topic: str, citation_format: str = "raw", language: str = "English") -> str:
+def generate_review(topic: str, citation_format: str = "raw", language: str = "English") -> Dict[str, Any]:
+    """
+    End-to-end pipeline that returns:
+    {
+      "query": <topic>,
+      "result": <single string body with [CITEKEY][DOI] style>,
+      "resources": <List[Dict] minimal records>,
+      "citations": <List[str] rendered in citation_format>
+    }
+    """
+    # 1) retrieval
     cr = CrossrefRetriever()
     sc = ScopusRetriever()
     rec_cr = cr.fetch_metadata(topic, k=50)
@@ -148,25 +183,42 @@ def generate_review(topic: str, citation_format: str = "raw", language: str = "E
 
     merged = rec_cr + rec_sc
     if not merged:
-        return f"# Literature review on: {topic}\n\n## Limitations\nNo records were retrieved from Crossref/Scopus for this query.\n"
+        return {
+            "query": topic,
+            "result": "No records were retrieved from Crossref/Scopus for this query.",
+            "resources": [],
+            "citations": [],
+        }
 
-    # dedupe + select
+    # 2) de-duplication and selection
     merged = _dedupe_citekeys(merged)
     top_records = _select_top_records(topic, merged, k=12)
-    records_json = _records_minimal_json(top_records)
+    records_min = _records_minimal_json(top_records)
 
-    # structured draft
-    chat = ChatOpenAI(model="gpt-4o", temperature=0.2)
-    draft_llm = chat.with_structured_output(LiteratureDraft, method="function_calling")
+    # 3) LLM drafting with structured output
+    chat = ChatOpenAI(model="gpt-4o-mini", temperature=0.2)
+    draft_llm = chat.with_structured_output(LiteratureDraft)
     prompt = ChatPromptTemplate.from_messages([("system", SYSTEM_PROMPT), ("human", HUMAN_PROMPT)])
     draft: LiteratureDraft = (prompt | draft_llm).invoke(
-        {"topic": topic, "language": language, "records_json": records_json}
+        {"topic": topic, "language": language, "records_json": records_min}
     )
 
-    # references → map citekeys back to merged (same field set)
+    # 4) Map citekeys -> DOI and select actually cited resources
     citekeys = draft.references or _gather_citekeys_from_text(draft.sections)
-    by_ck = {r["citekey"]: r for r in merged}
+    by_ck: Dict[str, Dict[str, Any]] = {r["citekey"]: r for r in (rec_cr + rec_sc)}
     selected_records = [by_ck[ck] for ck in citekeys if ck in by_ck]
-    rendered_refs = CitationFormatter().format(selected_records, style=citation_format)
+    doi_map = {r["citekey"]: r["doi"] for r in selected_records if r.get("doi")}
 
-    return _render_markdown(draft, rendered_refs)
+    # 5) Build result text with bracket citations
+    result_text = _draft_to_result_text(draft, doi_map)
+
+    # 6) Render citations list
+    citations_list = _render_citations_list(selected_records, citation_format=citation_format)
+
+    # 7) API object
+    return {
+        "query": topic,
+        "result": result_text,
+        "resources": _records_minimal_json(selected_records),
+        "citations": citations_list,
+    }
