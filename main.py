@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import asyncio
 from dotenv import load_dotenv
 
-from rag_agent.agent import generate_review
+from rag_agent.agent import generate_review  # sync, returns str
 
 load_dotenv()
 app = FastAPI(title="RAG Literature Review API")
@@ -20,15 +20,17 @@ class ReviewRequest(BaseModel):
         description="Output language e.g. English, Turkish, German …",
     )
 
-
 @app.post("/literature-review")
 async def literature_review(req: ReviewRequest):
     if not req.topic.strip():
         raise HTTPException(400, "Topic must not be empty")
-    out = await generate_review(
+
+    # generate_review is sync → run it in a worker thread
+    out = await asyncio.to_thread(
+        generate_review,
         topic=req.topic,
-        citation_format=req.citation_format.lower(),
-        language=req.language,
+        citation_format=(req.citation_format or "raw").lower(),
+        language=req.language or "English",
     )
     print(out)
     return out
