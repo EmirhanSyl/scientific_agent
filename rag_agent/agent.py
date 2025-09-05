@@ -119,7 +119,7 @@ Return ONLY a valid JSON object matching the LiteratureDraft schema:
 
 Rules:
 - Ground claims strictly on the provided records (titles/abstracts).
-- Use inline citations like (Smith2021) or (Lee2022a; Kim2023).
+- Use inline citations like (Smith 2021) or (Lee 2022a; Kim 2023).
 - Be precise, technical, and concise; avoid speculation.
 - Do not invent sources or citekeys not in the records.
 """
@@ -157,7 +157,7 @@ def generate_review(topic: str, citation_format: str = "raw", language: str = "E
 
     # structured draft
     chat = ChatOpenAI(model="gpt-4o", temperature=0.2)
-    draft_llm = chat.with_structured_output(LiteratureDraft)
+    draft_llm = chat.with_structured_output(LiteratureDraft, method="function_calling")
     prompt = ChatPromptTemplate.from_messages([("system", SYSTEM_PROMPT), ("human", HUMAN_PROMPT)])
     draft: LiteratureDraft = (prompt | draft_llm).invoke(
         {"topic": topic, "language": language, "records_json": records_json}

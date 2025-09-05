@@ -32,7 +32,7 @@ async def literature_review(req: ReviewRequest):
         citation_format=(req.citation_format or "raw").lower(),
         language=req.language or "English",
     )
-    print(out)
+    print(f"Result: {out}")
     return out
 
 if __name__ == "__main__":
