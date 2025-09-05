@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import asyncio
 from dotenv import load_dotenv
 
-from rag_agent.agent import generate_review, search_only  # sync, returns str
+from rag_agent.agent import generate_review  # sync, returns str
 
 load_dotenv()
 app = FastAPI(title="RAG Literature Review API")
@@ -21,22 +21,16 @@ class ReviewRequest(BaseModel):
     )
 
 @app.post("/literature-review")
-async def literature_review(req: ReviewRequest):
+def literature_review(req: ReviewRequest):
     if not req.topic.strip():
         raise HTTPException(400, "Topic must not be empty")
-
-    # review metni (string)
-    out = await asyncio.to_thread(
-        generate_review,
+    out = generate_review(
         topic=req.topic,
         citation_format=(req.citation_format or "raw").lower(),
         language=req.language or "English",
     )
-    # ham sonuçları da görmek istersen:
-    raw = await asyncio.to_thread(search_only, req.topic, 50)
-    print(raw)   # <- bu artık List[Dict] olacak
-
-    return out   # API’nin mevcut dönüş türünü bozmadan devam
+    print(out)
+    return out
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=7001)
