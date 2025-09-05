@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import List, Dict, Any
 import re
-from itertools import count
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.pydantic_v1 import BaseModel, Field
@@ -74,9 +73,8 @@ def _records_minimal_json(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
 
 
 def _gather_citekeys_from_text(sections: List[LiteratureSection]) -> List[str]:
-    """Find patterns like (Smith2020) or (Smith2020a; Lee2022)"""
+    """Find patterns like (Smith2020) or (Smith2020a; Lee2022)."""
     citekeys: List[str] = []
-    # capture every token inside parens, then split by ';'
     patt = re.compile(r"\(([^)]+)\)")
     for sec in sections:
         for match in patt.finditer(sec.body):
@@ -108,13 +106,13 @@ def _render_markdown(draft: LiteratureDraft, rendered_refs: List[str]) -> str:
     return "\n".join(lines)
 
 
-# ── Prompts ─────────────────────────────────────────────────────────────────
+# ── Prompts (escaped braces) ────────────────────────────────────────────────
 
 SYSTEM_PROMPT = """You are an expert academic writer.
 Return ONLY a valid JSON object matching the LiteratureDraft schema:
 - title: string
 - summary: string (150–250 words)
-- sections: array of {heading, body}
+- sections: array of {{heading, body}}
 - limitations: string
 - references: array of citekeys used in text
 
