@@ -161,8 +161,8 @@ def generate_review(topic: str, citation_format: str = "raw", language: str = "E
     records_json = _records_minimal_json(top_records)
 
     # 3) LLM drafting with structured output (internal)
-    chat = ChatOpenAI(model="gpt-4o-mini", temperature=0.2)
-    draft_llm = chat.with_structured_output(LiteratureDraft)
+    chat = ChatOpenAI(model="gpt-4o", temperature=0.2)
+    draft_llm = chat.with_structured_output(LiteratureDraft, method="function_calling")
     prompt = ChatPromptTemplate.from_messages(
         [("system", SYSTEM_PROMPT), ("human", HUMAN_PROMPT)]
     )
