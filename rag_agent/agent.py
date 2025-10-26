@@ -4,9 +4,9 @@ from typing import List, Dict, Any
 import re
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import FAISS
+from pydantic.v1 import BaseModel, Field
 
 from rag_agent.retrievers import CrossrefRetriever, ScopusRetriever, WosRetriever
 from utils.citations import CitationFormatter
