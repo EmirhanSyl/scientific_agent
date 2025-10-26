@@ -1,13 +1,13 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
-import asyncio
 from dotenv import load_dotenv
 
-from rag_agent.agent import generate_review  # sync, returns str
+from rag_agent.agent import generate_review  # returns Dict
 
 load_dotenv()
 app = FastAPI(title="RAG Literature Review API")
+
 
 class ReviewRequest(BaseModel):
     topic: str
@@ -20,6 +20,7 @@ class ReviewRequest(BaseModel):
         description="Output language e.g. English, Turkish, German …",
     )
 
+
 @app.post("/literature-review")
 def literature_review(req: ReviewRequest):
     if not req.topic.strip():
@@ -29,8 +30,8 @@ def literature_review(req: ReviewRequest):
         citation_format=(req.citation_format or "raw").lower(),
         language=req.language or "English",
     )
-    print(out)
     return out
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=7001)

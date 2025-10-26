@@ -100,11 +100,11 @@ POST /literature-review
 
 ## System Architecture
 
-* **Retrievers**: Modular design for metadata extraction from Crossref, Scopus, and Web of Science.
+~~* **Retrievers**: Modular design for metadata extraction from Crossref, Scopus, and Web of Science.
 * **Embedding + Retrieval**: Uses OpenAI embeddings and FAISS for nearest-neighbor search.
-* **LLM Backend**: `gpt-4o` and `gpt-4o-mini` models for natural language generation.
+* **LLM Backend**: Defaults to a local Ollama model via `ChatOllama` (`gpt-oss` at `http://localhost:11434`). If the local model is unavailable, automatically falls back to `ChatOpenAI(model="gpt-5")`
 * **Citation Formatter**: Styles include raw, BibTeX, and APA 7.
-* **Prompt Templates**: Designed for domain-aware, citation-rich synthesis.
+* **Prompt Templates**: Designed for domain-aware, citation-rich synthesis.~~
 
 ---
 
